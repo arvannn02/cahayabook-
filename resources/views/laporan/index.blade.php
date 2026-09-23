@@ -65,23 +65,8 @@
                 </div>
             </div>
 
-            {{-- Baris 2: Dropdown Tahun, Kalender Real yang Asli, & Tombol Unduh Laporan --}}
+            {{-- Baris 2: Kalender Real (Pilih Tanggal) & Tombol Unduh Laporan --}}
             <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
-                {{-- Dropdown Tahun --}}
-                <div class="relative w-[150px]">
-                    <select name="tahun" id="filterTahunSelect" onchange="onYearFilterChange(this)" 
-                            class="w-full appearance-none bg-white border border-gray-200 hover:border-gray-300 rounded-lg text-[13px] font-medium text-gray-700 pl-3.5 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-[#355240]/20 cursor-pointer shadow-sm transition-all">
-                        <option value="all" {{ $selectedTahun === 'all' ? 'selected' : '' }}>Semua Tahun (Semua Data)</option>
-                        @foreach($availableYears as $yr)
-                            <option value="{{ $yr }}" {{ (string)$selectedTahun === (string)$yr ? 'selected' : '' }}>
-                                Tahun {{ $yr }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                </div>
 
                 {{-- Kalender Real yang Asli (Interactive Date Picker Popup) --}}
                 <div class="relative" id="realCalendarContainer">
@@ -186,16 +171,16 @@
                 </div>
 
                 {{-- Reset Filter Button (opsional jika filter diterapkan) --}}
-                @if($selectedKategori !== 'all' || ($selectedTahun !== 'all' && count($availableYears) > 0 && (string)$selectedTahun !== (string)$availableYears[0]) || ($selectedTanggal && $selectedTanggal !== 'all'))
+                @if($selectedKategori !== 'all' || ($selectedTanggal && $selectedTanggal !== 'all'))
                     <a href="{{ route('laporan.index') }}" class="inline-flex items-center gap-1.5 px-2.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-[12.5px] font-semibold transition-colors" title="Reset filter">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </a>
                 @endif
 
-                {{-- Tombol Unduh Laporan --}}
-                <button type="button" onclick="window.print()" class="inline-flex items-center gap-2 bg-[#2d4636] hover:bg-[#22362a] text-white px-4 py-2 rounded-lg text-[13px] font-semibold transition-colors shadow-sm whitespace-nowrap cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    <span>Unduh Laporan</span>
+                {{-- Tombol Unduh Laporan (Membuka Modal Konfirmasi) --}}
+                <button type="button" onclick="openConfirmDownloadModal(event)" class="inline-flex items-center gap-2 bg-[#2d4636] hover:bg-[#22362a] text-white px-4 py-2 rounded-lg text-[13px] font-semibold transition-colors shadow-sm whitespace-nowrap cursor-pointer active:scale-[0.98]" title="Unduh Dokumen Laporan Resmi (Format PDF)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>Unduh Laporan (PDF)</span>
                 </button>
             </div>
         </form>
@@ -581,11 +566,6 @@ function clearDateFilter() {
     document.getElementById('filterForm').submit();
 }
 
-function onYearFilterChange(selectEl) {
-    document.getElementById('filterTanggalInput').value = '';
-    selectEl.form.submit();
-}
-
 function calPrevMonth() {
     if (calCurrentMonth === 0) {
         calCurrentMonth = 11;
@@ -806,5 +786,82 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// Modal Konfirmasi Unduh Laporan PDF
+function openConfirmDownloadModal(e) {
+    if (e) e.preventDefault();
+    const modal = document.getElementById('modal-confirm-download');
+    if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+}
+
+function closeConfirmDownloadModal() {
+    const modal = document.getElementById('modal-confirm-download');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+}
+
+function prosesUnduhPdf() {
+    closeConfirmDownloadModal();
+    const form = document.getElementById('filterForm');
+    const formData = new FormData(form);
+    const params = new URLSearchParams(formData);
+    window.location.href = "{{ route('laporan.exportPdf') }}?" + params.toString();
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeConfirmDownloadModal();
+    }
+});
 </script>
+
+{{-- GLOBAL MODAL KONFIRMASI UNDUH LAPORAN PDF (DESAIN PERSIS FOTO KE-2) --}}
+<div id="modal-confirm-download" class="hidden fixed inset-0 z-[9999] overflow-y-auto bg-black/50 backdrop-blur-sm transition-all duration-200" onclick="if(event.target === this) closeConfirmDownloadModal()">
+    <div class="min-h-full flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transform transition-all animate-in fade-in zoom-in duration-150 p-6" onclick="event.stopPropagation()">
+            <div class="flex items-start gap-4">
+                {{-- Icon PDF Download --}}
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-[#2d4636] flex items-center justify-center flex-shrink-0 border border-emerald-100 shadow-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-[17px] font-bold text-[#111827] leading-snug">Konfirmasi Unduh Laporan?</h3>
+                    <p class="text-[13px] text-[#6b7280] mt-1.5 leading-relaxed">
+                        Apakah Anda yakin ingin membuat dan mengunduh berkas laporan inventaris ini dalam format PDF?
+                    </p>
+                    
+                    {{-- Notice Box (Amber Notice sesuai foto ke-2) --}}
+                    <div class="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200/80 text-[12px] text-amber-900 flex items-start gap-2.5">
+                        <svg class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="leading-relaxed">
+                            Pastikan filter data yang Anda pilih sudah sesuai. Berkas PDF resmi akan langsung diunduh ke perangkat Anda.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Action Buttons --}}
+            <div class="mt-6 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeConfirmDownloadModal()" class="px-4 py-2.5 text-[13px] font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer">
+                    Batal
+                </button>
+                <button type="button" onclick="prosesUnduhPdf()" class="inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-semibold text-white bg-[#2d4636] hover:bg-[#203426] rounded-xl transition-all shadow-sm cursor-pointer active:scale-[0.98]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span>Ya, Unduh Laporan</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

@@ -92,7 +92,19 @@ class PenulisController extends Controller
             'kewarganegaraan' => ['nullable', 'string', 'max:100'],
         ]);
 
-        Penulis::create($data);
+        $penulis = Penulis::create($data);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Penulis berhasil ditambahkan.',
+                'data' => [
+                    'id' => $penulis->id,
+                    'text' => $penulis->nama_penulis,
+                ],
+            ]);
+        }
+
         return back()->with('success', 'Penulis berhasil ditambahkan.');
     }
 

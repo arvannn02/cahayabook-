@@ -68,7 +68,7 @@
                 </div>
 
                 <h4 class="text-[18px] font-bold text-gray-900 mb-0.5">petugas_cahaya</h4>
-                <p class="text-[13px] text-gray-500 mb-3">Shared Warehouse Account</p>
+                <p class="text-[13px] text-gray-500 mb-3">Shared Admin Account</p>
 
                 {{-- Status Badge --}}
                 <span class="inline-flex items-center gap-1.5 bg-[#e8f3ea] text-[#4a6b54] rounded-full px-3.5 py-1 text-[12px] font-semibold">

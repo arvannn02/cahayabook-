@@ -103,7 +103,19 @@ class KategoriController extends Controller
             $data['kode_kategori'] = 'KAT - ' . ($initials ?: 'GEN');
         }
 
-        KategoriBuku::create($data);
+        $kategori = KategoriBuku::create($data);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Kategori berhasil ditambahkan.',
+                'data' => [
+                    'id' => $kategori->id,
+                    'text' => $kategori->nama_kategori,
+                ],
+            ]);
+        }
+
         return back()->with('success', 'Kategori berhasil ditambahkan.');
     }
 

@@ -117,7 +117,19 @@ class RakBukuController extends Controller
             $data['kode_rak'] = RakBuku::generateKodeRak($data['kategori_buku'] ?? null);
         }
 
-        RakBuku::create($data);
+        $rak = RakBuku::create($data);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Rak dengan kode ' . $data['kode_rak'] . ' berhasil ditambahkan.',
+                'data' => [
+                    'id' => $rak->id,
+                    'text' => $rak->kode_rak . ' (' . $rak->lokasi . ')',
+                ],
+            ]);
+        }
+
         return back()->with('success', 'Rak dengan kode ' . $data['kode_rak'] . ' berhasil ditambahkan.');
     }
 

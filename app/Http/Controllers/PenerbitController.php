@@ -87,12 +87,24 @@ class PenerbitController extends Controller
         $data = $request->validate([
             'nama_penerbit' => ['required', 'string', 'max:150'],
             'alamat' => ['nullable', 'string'],
-            'telepon' => ['nullable', 'string', 'max:15']
+            'telepon' => ['nullable', 'string', 'max:20']
         ], [
             'nama_penerbit.required' => 'Nama penerbit wajib diisi.',
-            'telepon.max' => 'Nomor telepon maksimal 15 digit.',
+            'telepon.max' => 'Nomor telepon maksimal 20 karakter.',
         ]);
-        Penerbit::create($data);
+        $penerbit = Penerbit::create($data);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Penerbit berhasil ditambahkan.',
+                'data' => [
+                    'id' => $penerbit->id,
+                    'text' => $penerbit->nama_penerbit,
+                ],
+            ]);
+        }
+
         return back()->with('success', 'Penerbit berhasil ditambahkan.');
     }
 
@@ -101,10 +113,10 @@ class PenerbitController extends Controller
         $data = $request->validate([
             'nama_penerbit' => ['required', 'string', 'max:150'],
             'alamat' => ['nullable', 'string'],
-            'telepon' => ['nullable', 'string', 'max:15']
+            'telepon' => ['nullable', 'string', 'max:20']
         ], [
             'nama_penerbit.required' => 'Nama penerbit wajib diisi.',
-            'telepon.max' => 'Nomor telepon maksimal 15 digit.',
+            'telepon.max' => 'Nomor telepon maksimal 20 karakter.',
         ]);
         $penerbit->update($data);
         return back()->with('success', 'Penerbit berhasil diperbarui.');

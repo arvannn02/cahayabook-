@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
 
     // Laporan
     Route::get('/laporan', [\App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/export-pdf', [\App\Http\Controllers\LaporanController::class, 'exportPdf'])->name('laporan.exportPdf');
 
     // Pengguna
     Route::get('/pengguna', [\App\Http\Controllers\PenggunaController::class, 'index'])->name('pengguna.index');

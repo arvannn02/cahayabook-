@@ -73,26 +73,52 @@ class BukuController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'isbn' => ['required', 'string', 'max:30', 'unique:buku,isbn'], 'judul' => ['required', 'string', 'max:200'],
-            'id_kategori' => ['required', 'exists:kategori_buku,id'], 'id_penulis' => ['required', 'exists:penulis,id'],
-            'id_penerbit' => ['required', 'exists:penerbit,id'], 'id_rak' => ['required', 'exists:rak_buku,id'],
-            'harga_beli' => ['nullable', 'numeric', 'min:0'], 'harga_jual' => ['nullable', 'numeric', 'min:0'],
-            'tahun_terbit' => ['nullable', 'integer', 'min:1000', 'max:'.date('Y')],
+        $request->merge([
+            'isbn' => preg_replace('/[^0-9]/', '', (string)$request->isbn)
         ]);
+
+        $data = $request->validate([
+            'isbn' => ['required', 'regex:/^[0-9]{13}$/', 'unique:buku,isbn'],
+            'judul' => ['required', 'string', 'max:200'],
+            'id_kategori' => ['required', 'exists:kategori_buku,id'],
+            'id_penulis' => ['required', 'exists:penulis,id'],
+            'id_penerbit' => ['required', 'exists:penerbit,id'],
+            'id_rak' => ['required', 'exists:rak_buku,id'],
+            'harga_beli' => ['nullable', 'numeric', 'min:0'],
+            'harga_jual' => ['nullable', 'numeric', 'min:0'],
+            'tahun_terbit' => ['nullable', 'integer', 'min:1000', 'max:'.date('Y')],
+        ], [
+            'isbn.required' => 'Nomor ISBN wajib diisi.',
+            'isbn.regex'    => 'Nomor ISBN harus tepat 13 digit angka (tidak boleh kurang atau lebih).',
+            'isbn.unique'   => 'Nomor ISBN sudah terdaftar dalam sistem.',
+        ]);
+
         Buku::create($data);
         return back()->with('success', 'Buku berhasil ditambahkan.');
     }
 
     public function update(Request $request, Buku $buku)
     {
-        $data = $request->validate([
-            'isbn' => ['required', 'string', 'max:30', 'unique:buku,isbn,'.$buku->id], 'judul' => ['required', 'string', 'max:200'],
-            'id_kategori' => ['required', 'exists:kategori_buku,id'], 'id_penulis' => ['required', 'exists:penulis,id'],
-            'id_penerbit' => ['required', 'exists:penerbit,id'], 'id_rak' => ['required', 'exists:rak_buku,id'],
-            'harga_beli' => ['nullable', 'numeric', 'min:0'], 'harga_jual' => ['nullable', 'numeric', 'min:0'],
-            'tahun_terbit' => ['nullable', 'integer', 'min:1000', 'max:'.date('Y')],
+        $request->merge([
+            'isbn' => preg_replace('/[^0-9]/', '', (string)$request->isbn)
         ]);
+
+        $data = $request->validate([
+            'isbn' => ['required', 'regex:/^[0-9]{13}$/', 'unique:buku,isbn,'.$buku->id],
+            'judul' => ['required', 'string', 'max:200'],
+            'id_kategori' => ['required', 'exists:kategori_buku,id'],
+            'id_penulis' => ['required', 'exists:penulis,id'],
+            'id_penerbit' => ['required', 'exists:penerbit,id'],
+            'id_rak' => ['required', 'exists:rak_buku,id'],
+            'harga_beli' => ['nullable', 'numeric', 'min:0'],
+            'harga_jual' => ['nullable', 'numeric', 'min:0'],
+            'tahun_terbit' => ['nullable', 'integer', 'min:1000', 'max:'.date('Y')],
+        ], [
+            'isbn.required' => 'Nomor ISBN wajib diisi.',
+            'isbn.regex'    => 'Nomor ISBN harus tepat 13 digit angka (tidak boleh kurang atau lebih).',
+            'isbn.unique'   => 'Nomor ISBN sudah terdaftar dalam sistem.',
+        ]);
+
         $buku->update($data);
         return back()->with('success', 'Buku berhasil diperbarui.');
     }

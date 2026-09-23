@@ -501,8 +501,8 @@
 
                 <div>
                     <label class="block text-[12px] font-semibold text-[#374151] mb-1">Telepon</label>
-                    <input type="text" name="telepon" maxlength="15" placeholder="Contoh: 021-5365011" class="w-full px-3.5 py-2 text-[13px] border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636]">
-                    <p class="text-[11px] text-gray-400 mt-1">Maksimal 15 digit.</p>
+                    <input type="text" name="telepon" maxlength="20" placeholder="Contoh: +62 81234567890" class="w-full px-3.5 py-2 text-[13px] border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636]">
+                    <p class="text-[11px] text-gray-400 mt-1">Maksimal 20 karakter termasuk kode negara.</p>
                 </div>
 
                 <div>
@@ -558,8 +558,8 @@
 
                 <div>
                     <label class="block text-[12px] font-semibold text-[#374151] mb-1">Telepon</label>
-                    <input type="text" id="edit-telepon" name="telepon" maxlength="15" class="w-full px-3.5 py-2 text-[13px] border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636]">
-                    <p class="text-[11px] text-gray-400 mt-1">Maksimal 15 digit.</p>
+                    <input type="text" id="edit-telepon" name="telepon" maxlength="20" class="w-full px-3.5 py-2 text-[13px] border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636]">
+                    <p class="text-[11px] text-gray-400 mt-1">Maksimal 20 karakter termasuk kode negara.</p>
                 </div>
 
                 <div>

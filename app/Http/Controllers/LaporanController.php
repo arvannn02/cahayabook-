@@ -10,11 +10,13 @@ use App\Models\StokBuku;
 use App\Models\KategoriBuku;
 use App\Models\RakBuku;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class LaporanController extends Controller
 {
-    public function index(Request $request)
+    public function getLaporanData(Request $request): array
     {
         // 1. Opsi filter Kategori dan Tahun yang tersedia di database
         $kategoriList = KategoriBuku::orderBy('nama_kategori')->get();
@@ -352,7 +354,7 @@ class LaporanController extends Controller
         $totalNilaiMasuk = $transaksiMasukDetail->sum('subtotal');
         $totalNilaiKeluar = $transaksiKeluarDetail->sum('subtotal');
 
-        return view('laporan.index', compact(
+        return compact(
             'kategoriList',
             'availableYears',
             'selectedKategori',
@@ -387,7 +389,50 @@ class LaporanController extends Controller
             'transaksiKeluarDetail',
             'totalNilaiMasuk',
             'totalNilaiKeluar'
-        ));
+        );
+    }
+
+    public function index(Request $request)
+    {
+        $data = $this->getLaporanData($request);
+        return view('laporan.index', $data);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $data = $this->getLaporanData($request);
+
+        // Kategori Terpilih
+        $kategoriObj = ($data['selectedKategori'] && $data['selectedKategori'] !== 'all') 
+            ? KategoriBuku::find($data['selectedKategori']) 
+            : null;
+        $data['namaKategoriTerpilih'] = $kategoriObj ? $kategoriObj->nama_kategori : 'Semua Kategori';
+
+        // Periode Deskriptif
+        if ($data['selectedTanggal'] && $data['selectedTanggal'] !== 'all') {
+            $data['periodeLabel'] = Carbon::parse($data['selectedTanggal'])->translatedFormat('d F Y');
+        } elseif ($data['selectedBulan'] && $data['selectedBulan'] !== 'all') {
+            $namaBulan = $data['namaBulanLengkap'][(int)$data['selectedBulan']] ?? '';
+            $thn = ($data['selectedTahun'] && $data['selectedTahun'] !== 'all') ? ' ' . $data['selectedTahun'] : '';
+            $data['periodeLabel'] = $namaBulan . $thn;
+        } elseif ($data['selectedTahun'] && $data['selectedTahun'] !== 'all') {
+            $data['periodeLabel'] = 'Tahun ' . $data['selectedTahun'];
+        } else {
+            $data['periodeLabel'] = 'Semua Periode (Data Lengkap)';
+        }
+
+        $user = Auth::user();
+        $data['tanggalCetak'] = Carbon::now()->timezone('Asia/Jakarta')->translatedFormat('d F Y, H:i') . ' WIB';
+        $data['petugasCetak'] = $user->nama ?? $user->name ?? 'Admin Cahaya Buku';
+        $data['roleCetak'] = strtoupper($user->role ?? 'ADMIN');
+
+        $pdf = Pdf::loadView('laporan.pdf', $data);
+        $pdf->setPaper('a4', 'portrait');
+
+        $safePeriode = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $data['periodeLabel']);
+        $filename = "Laporan_Inventaris_Cahaya_Buku_{$safePeriode}.pdf";
+
+        return $pdf->download($filename);
     }
 }
 
