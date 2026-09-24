@@ -804,9 +804,67 @@
                         <label class="block text-[12px] font-semibold text-[#374151] mb-1">Nama Penulis <span class="text-red-500">*</span></label>
                         <input type="text" id="quick-penulis-nama" placeholder="Contoh: Tere Liye, Andrea Hirata" class="w-full px-3.5 py-2 text-[13px] border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636]">
                     </div>
-                    <div>
-                        <label class="block text-[12px] font-semibold text-[#374151] mb-1">Kewarganegaraan <span class="text-gray-400 font-normal">(Opsional)</span></label>
-                        <input type="text" id="quick-penulis-negara" placeholder="Contoh: Indonesia, Inggris" class="w-full px-3.5 py-2 text-[13px] border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636]">
+                    {{-- Kewarganegaraan Penulis & Dropdown (195 Negara Dunia & Kode Telepon) --}}
+                    <div class="relative" id="penulis-country-dropdown-container">
+                        <label class="block text-[12px] font-semibold text-[#374151] mb-1">Kewarganegaraan <span class="text-gray-400 font-normal">(195 Negara & Kode Telepon)</span></label>
+                        <input type="hidden" id="quick-penulis-negara" value="Indonesia">
+                        <button type="button" 
+                                id="penulis-country-btn" 
+                                onclick="togglePenulisCountryDropdown(event)" 
+                                class="w-full flex items-center justify-between px-3.5 py-2.5 text-[13px] border border-[#d1d5db] rounded-xl bg-white hover:border-[#2d4636] focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636] transition-all cursor-pointer shadow-xs">
+                            <div class="flex items-center gap-2.5">
+                                <span id="penulis-selected-flag-wrapper" class="inline-flex items-center justify-center w-5 h-3.5 rounded-[2px] overflow-hidden border border-gray-200/80 bg-gray-50 flex-shrink-0">
+                                    <img id="penulis-selected-flag-img" src="https://flagcdn.com/w40/id.png" alt="Indonesia" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('penulis-selected-flag-emoji').style.display='inline';">
+                                    <span id="penulis-selected-flag-emoji" style="display:none;" class="text-[12px]">🇮🇩</span>
+                                </span>
+                                <span id="penulis-selected-name" class="font-medium text-gray-800">Indonesia</span>
+                                <span id="penulis-selected-dial" class="text-[11.5px] font-mono text-gray-500 font-semibold bg-gray-100 px-1.5 py-0.5 rounded">(+62)</span>
+                            </div>
+                            <svg id="penulis-country-chevron" class="w-4 h-4 text-gray-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        {{-- Dropdown Menu Penulis (In-Flow, 195 Negara Lengkap Kode Telepon Bisa Di-Scroll Penuh) --}}
+                        <div id="penulis-country-menu" class="hidden mt-2 bg-white border border-[#d1d5db] rounded-xl shadow-md overflow-hidden transition-all duration-150" onclick="event.stopPropagation()">
+                            {{-- Header with counter --}}
+                            <div class="px-3.5 py-2 bg-[#f8faf9] border-b border-gray-100 flex items-center justify-between text-[11px] font-semibold text-gray-600">
+                                <span class="flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-[#2d4636]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Daftar Lengkap 195 Negara</span>
+                                </span>
+                                <span id="penulis-country-counter-badge" class="px-2 py-0.5 rounded-full bg-[#edf3ee] text-[#2d4636] font-bold text-[10.5px]">195 Negara</span>
+                            </div>
+
+                            {{-- Search input --}}
+                            <div class="p-2 border-b border-gray-100 bg-[#f9fafb]">
+                                <div class="relative">
+                                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    <input type="text" 
+                                           id="penulis-country-search" 
+                                           placeholder="Ketik untuk mencari dari 195 negara atau kode telepon..." 
+                                           autocomplete="off"
+                                           oninput="filterPenulisCountries(this.value)"
+                                           onkeydown="handlePenulisCountrySearchKeydown(event)"
+                                           class="w-full pl-9 pr-3 py-1.5 text-[12.5px] border border-gray-300 rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636] bg-white">
+                                </div>
+                            </div>
+
+                            {{-- List of 195 countries (Scrollable, Always Visible Scrollbar) --}}
+                            <div id="penulis-country-list" style="height: 250px; max-height: 250px; overflow-y: scroll; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" class="overscroll-contain divide-y divide-gray-50 py-1 text-[13px]">
+                                {{-- Populated dynamically by JS with all 195 countries --}}
+                            </div>
+                            <div id="penulis-country-empty" class="hidden p-4 text-center text-xs text-gray-400">
+                                Negara tidak ditemukan
+                            </div>
+
+                            {{-- Footer with scroll indicator --}}
+                            <div class="px-3 py-1.5 bg-[#f9fafb] border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500 select-none">
+                                <span class="flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 text-gray-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                                    <span>Gulir ke bawah untuk melihat semua negara</span>
+                                </span>
+                                <span class="text-[10px] text-gray-400 font-mono">195 Negara Dunia</span>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-[12px] font-semibold text-[#374151] mb-1">Biografi Singkat <span class="text-gray-400 font-normal">(Opsional)</span></label>
@@ -889,21 +947,16 @@
                             <label class="block text-[12px] font-semibold text-[#374151]">Nomor Telepon <span class="text-gray-400 font-normal">(Opsional)</span></label>
                             <span id="quick-penerbit-telepon-counter" class="text-[11px] font-mono font-medium text-[#9ca3af]">0 / 12 digit</span>
                         </div>
-                        <div class="flex rounded-lg border border-[#d1d5db] focus-within:border-[#2d4636] focus-within:ring-1 focus-within:ring-[#2d4636] overflow-hidden bg-white transition-all shadow-2xs">
-                            <div id="quick-penerbit-prefix-badge" class="px-3 py-2 bg-[#f9fafb] border-r border-[#d1d5db] text-[#374151] font-mono text-[13px] font-bold flex items-center gap-1.5 select-none flex-shrink-0">
-                                <span id="quick-penerbit-prefix-dial">+62</span>
-                            </div>
-                            <input type="text" 
-                                   id="quick-penerbit-telepon" 
-                                   inputmode="numeric" 
-                                   maxlength="12" 
-                                   placeholder="Contoh: 81234567890" 
-                                   autocomplete="off" 
-                                   class="w-full px-3.5 py-2 text-[13px] font-mono border-0 focus:outline-none bg-transparent text-[#111827]">
-                        </div>
+                        <input type="text" 
+                               id="quick-penerbit-telepon" 
+                               inputmode="numeric" 
+                               maxlength="12" 
+                               placeholder="Contoh: 081234567890" 
+                               autocomplete="off" 
+                               class="w-full px-3.5 py-2 text-[13px] font-mono border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636] transition-all">
                         <div id="quick-penerbit-telepon-feedback" class="text-[11.5px] mt-1.5 flex items-center gap-1.5 text-[#6b7280]">
                             <svg class="w-3.5 h-3.5 flex-shrink-0 text-[#9ca3af]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span>Maksimal 12 digit angka tanpa kode negara (Contoh: 81234567890).</span>
+                            <span>Maksimal 12 digit angka (tidak boleh kurang dan tidak boleh lebih).</span>
                         </div>
                     </div>
 
@@ -957,29 +1010,54 @@
     .animate-shake {
         animation: shake 0.4s ease-in-out;
     }
-    /* Always visible prominent scrollbar for 195 countries list */
-    #penerbit-country-list {
+    /* Always visible prominent scrollbar for 195 countries list (Matches Photo 2) */
+    #penerbit-country-list,
+    #penulis-country-list {
         scrollbar-width: thin;
-        scrollbar-color: #2d4636 #e2e8f0;
+        scrollbar-color: #2d4636 #edf2f7;
+        overscroll-behavior: contain;
     }
-    #penerbit-country-list::-webkit-scrollbar {
-        width: 10px;
+    #penerbit-country-list::-webkit-scrollbar,
+    #penulis-country-list::-webkit-scrollbar {
+        width: 14px;
+        display: block;
     }
-    #penerbit-country-list::-webkit-scrollbar-track {
-        background: #f1f5f9;
-        border-radius: 8px;
+    #penerbit-country-list::-webkit-scrollbar-track,
+    #penulis-country-list::-webkit-scrollbar-track {
+        background: #edf2f7;
+        border-radius: 4px;
     }
-    #penerbit-country-list::-webkit-scrollbar-thumb {
+    #penerbit-country-list::-webkit-scrollbar-thumb,
+    #penulis-country-list::-webkit-scrollbar-thumb {
         background-color: #2d4636;
-        border-radius: 8px;
-        border: 2px solid #f1f5f9;
+        border-radius: 6px;
+        border: 2px solid #edf2f7;
     }
-    #penerbit-country-list::-webkit-scrollbar-thumb:hover {
+    #penerbit-country-list::-webkit-scrollbar-thumb:hover,
+    #penulis-country-list::-webkit-scrollbar-thumb:hover {
         background-color: #1b2e23;
+    }
+    #penerbit-country-list::-webkit-scrollbar-button:single-button:vertical:decrement,
+    #penulis-country-list::-webkit-scrollbar-button:single-button:vertical:decrement {
+        background-color: #edf2f7;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='%232d4636'><path d='M12 6l-6 8h12z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 16px;
+        display: block;
+    }
+    #penerbit-country-list::-webkit-scrollbar-button:single-button:vertical:increment,
+    #penulis-country-list::-webkit-scrollbar-button:single-button:vertical:increment {
+        background-color: #edf2f7;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='%232d4636'><path d='M12 18l6-8H6z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 16px;
+        display: block;
     }
 </style>
 
-<script src="{{ asset('js/countries195.js') }}"></script>
+<script src="{{ asset('js/countries195.js') }}?v={{ filemtime(public_path('js/countries195.js')) }}"></script>
 <script>
     // ---- Toast Notification for ISBN ----
     var isbnToastTimeout;
@@ -1523,6 +1601,165 @@
         if (phoneInput) phoneInput.focus();
     }
 
+    // ==========================================
+    // PENULIS COUNTRY DROPDOWN (195 NEGARA DUNIA)
+    // ==========================================
+    var currentSelectedPenulisCountry = ALL_COUNTRIES_195[0];
+
+    function renderPenulisCountryList(query) {
+        var listContainer = document.getElementById('penulis-country-list');
+        var emptyNotice = document.getElementById('penulis-country-empty');
+        if (!listContainer) return;
+
+        var countries = (window.COUNTRIES_195 && window.COUNTRIES_195.length >= 195) ? window.COUNTRIES_195 : ALL_COUNTRIES_195;
+        var counterBadge = document.getElementById('penulis-country-counter-badge');
+        var q = (query || '').toLowerCase().trim();
+
+        var filtered = countries.filter(function(c) {
+            if (!q) return true;
+            return c.name.toLowerCase().includes(q) ||
+                   c.en.toLowerCase().includes(q) ||
+                   c.code.toLowerCase().includes(q) ||
+                   c.dial.includes(q);
+        });
+
+        if (counterBadge) {
+            counterBadge.textContent = q ? (filtered.length + ' dari 195 Negara') : (filtered.length + ' Negara');
+        }
+
+        if (filtered.length === 0) {
+            listContainer.innerHTML = '';
+            if (emptyNotice) emptyNotice.classList.remove('hidden');
+            return;
+        }
+
+        if (emptyNotice) emptyNotice.classList.add('hidden');
+
+        var html = '';
+        filtered.forEach(function(c) {
+            var isSelected = (currentSelectedPenulisCountry && currentSelectedPenulisCountry.code === c.code);
+            var flagHtml = getCountryFlagHtml(c);
+            var checkIcon = isSelected ?
+                '<svg class="w-4 h-4 text-[#2d4636] flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>' : '';
+
+            var itemBg = isSelected ? 'bg-gray-100/80 font-semibold text-[#111827]' : 'text-gray-700 hover:bg-gray-50';
+
+            html += '<button type="button" onclick="selectPenulisCountry(\'' + c.code + '\')" class="w-full px-3.5 py-2 text-left flex items-center justify-between transition-colors ' + itemBg + ' cursor-pointer">' +
+                    '<div class="flex items-center gap-2.5 overflow-hidden">' +
+                    flagHtml +
+                    '<span class="truncate">' + c.name + '</span>' +
+                    '<span class="text-[11px] font-mono text-gray-400 font-semibold flex-shrink-0">(' + c.dial + ')</span>' +
+                    '</div>' +
+                    checkIcon +
+                    '</button>';
+        });
+
+        listContainer.innerHTML = html;
+    }
+
+    function togglePenulisCountryDropdown(e) {
+        if (e) e.stopPropagation();
+        var menu = document.getElementById('penulis-country-menu');
+        var chevron = document.getElementById('penulis-country-chevron');
+        if (!menu) return;
+
+        var isHidden = menu.classList.contains('hidden');
+        if (isHidden) {
+            menu.classList.remove('hidden');
+            if (chevron) chevron.classList.add('rotate-180');
+            var searchInput = document.getElementById('penulis-country-search');
+            if (searchInput) {
+                searchInput.value = '';
+                setTimeout(function() { searchInput.focus(); }, 50);
+            }
+            renderPenulisCountryList('');
+            setupPenulisCountryListScroll();
+        } else {
+            closePenulisCountryDropdown();
+        }
+    }
+
+    function setupPenulisCountryListScroll() {
+        var list = document.getElementById('penulis-country-list');
+        var menu = document.getElementById('penulis-country-menu');
+        if (!list) return;
+
+        if (!list.dataset.wheelBound) {
+            list.dataset.wheelBound = 'true';
+            list.addEventListener('wheel', function(e) {
+                var delta = e.deltaY;
+                var atTop = list.scrollTop <= 0 && delta < 0;
+                var atBottom = (list.scrollTop + list.clientHeight >= list.scrollHeight - 1) && delta > 0;
+                if (atTop || atBottom) {
+                    e.preventDefault();
+                }
+                e.stopPropagation();
+            }, { passive: false });
+        }
+
+        if (menu && !menu.dataset.menuWheelBound) {
+            menu.dataset.menuWheelBound = 'true';
+            menu.addEventListener('wheel', function(e) {
+                if (e.target !== list && !list.contains(e.target)) {
+                    list.scrollTop += e.deltaY;
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, { passive: false });
+        }
+    }
+
+    function handlePenulisCountrySearchKeydown(e) {
+        var list = document.getElementById('penulis-country-list');
+        if (!list) return;
+        if (e.key === 'ArrowDown') {
+            list.scrollTop += 42;
+            e.preventDefault();
+        } else if (e.key === 'ArrowUp') {
+            list.scrollTop -= 42;
+            e.preventDefault();
+        } else if (e.key === 'Enter') {
+            var firstBtn = list.querySelector('button');
+            if (firstBtn) {
+                firstBtn.click();
+                e.preventDefault();
+            }
+        }
+    }
+
+    function closePenulisCountryDropdown() {
+        var menu = document.getElementById('penulis-country-menu');
+        var chevron = document.getElementById('penulis-country-chevron');
+        if (menu) menu.classList.add('hidden');
+        if (chevron) chevron.classList.remove('rotate-180');
+    }
+
+    function filterPenulisCountries(q) {
+        renderPenulisCountryList(q);
+        setupPenulisCountryListScroll();
+    }
+
+    function selectPenulisCountry(code) {
+        var countries = (window.COUNTRIES_195 && window.COUNTRIES_195.length >= 195) ? window.COUNTRIES_195 : ALL_COUNTRIES_195;
+        var found = countries.find(function(c) { return c.code === code; });
+        if (!found) return;
+
+        currentSelectedPenulisCountry = found;
+
+        // Update trigger button (flag + name + dial)
+        var nameEl = document.getElementById('penulis-selected-name');
+        var dialEl = document.getElementById('penulis-selected-dial');
+        var flagWrapper = document.getElementById('penulis-selected-flag-wrapper');
+        var hiddenInput = document.getElementById('quick-penulis-negara');
+
+        if (nameEl) nameEl.textContent = found.name;
+        if (dialEl) dialEl.textContent = '(' + found.dial + ')';
+        if (flagWrapper) flagWrapper.innerHTML = getCountryFlagHtml(found);
+        if (hiddenInput) hiddenInput.value = found.name;
+
+        closePenulisCountryDropdown();
+    }
+
     // Phone input restriction: max 12 digits, digits only, live counter & feedback
     function initPenerbitPhoneInput() {
         var input = document.getElementById('quick-penerbit-telepon');
@@ -1546,22 +1783,28 @@
                 if (len === 0) {
                     counter.className = 'text-[11px] font-mono font-medium text-[#9ca3af]';
                 } else if (len < 12) {
-                    counter.className = 'text-[11px] font-mono font-semibold text-[#2d4636]';
+                    counter.className = 'text-[11px] font-mono font-bold text-amber-600';
                 } else {
-                    counter.className = 'text-[11px] font-mono font-bold text-emerald-700';
+                    counter.className = 'text-[11px] font-mono font-bold text-emerald-600';
                 }
             }
 
             if (feedback) {
                 if (len === 0) {
-                    feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-[#9ca3af]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Maksimal 12 digit angka tanpa kode negara (Contoh: 81234567890).</span>';
+                    feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-[#9ca3af]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Maksimal 12 digit angka (tidak boleh kurang dan tidak boleh lebih).</span>';
                     feedback.className = 'text-[11.5px] mt-1.5 flex items-center gap-1.5 text-[#6b7280]';
+                    input.classList.remove('border-amber-400', 'border-rose-500', 'border-emerald-500');
+                    input.classList.add('border-[#d1d5db]');
                 } else if (len < 12) {
-                    feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-[#2d7a4d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Nomor valid (' + len + ' digit). Tersisa ' + (12 - len) + ' digit lagi.</span>';
-                    feedback.className = 'text-[11.5px] mt-1.5 flex items-center gap-1.5 text-[#2d7a4d]';
+                    feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span class="font-medium text-amber-700">Kurang ' + (12 - len) + ' digit lagi (' + len + '/12 digit). Nomor telepon harus tepat 12 digit.</span>';
+                    feedback.className = 'text-[11.5px] mt-1.5 flex items-center gap-1.5 text-amber-700';
+                    input.classList.remove('border-[#d1d5db]', 'border-emerald-500', 'border-rose-500');
+                    input.classList.add('border-amber-400');
                 } else {
-                    feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg><span>Batas maksimal 12 digit telah tercapai.</span>';
-                    feedback.className = 'text-[11.5px] mt-1.5 flex items-center gap-1.5 text-emerald-700 font-medium';
+                    feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg><span class="font-medium text-emerald-700">✓ Nomor telepon valid (tepat 12 digit).</span>';
+                    feedback.className = 'text-[11.5px] mt-1.5 flex items-center gap-1.5 text-emerald-700';
+                    input.classList.remove('border-[#d1d5db]', 'border-amber-400', 'border-rose-500');
+                    input.classList.add('border-emerald-500');
                 }
             }
         }
@@ -1652,6 +1895,9 @@
         if (type === 'rak') {
             var kapInput = document.getElementById('quick-rak-kapasitas');
             if (kapInput) kapInput.value = '100';
+        } else if (type === 'penulis') {
+            selectPenulisCountry('ID');
+            closePenulisCountryDropdown();
         } else if (type === 'penerbit') {
             selectPenerbitCountry('ID');
             var telInput = document.getElementById('quick-penerbit-telepon');
@@ -1669,6 +1915,7 @@
     }
 
     function closeQuickModal() {
+        closePenulisCountryDropdown();
         closeCountryDropdown();
         document.getElementById('quick-modal').classList.add('hidden');
     }
@@ -1695,7 +1942,7 @@
                 return;
             }
             payload.nama_penulis = nama;
-            payload.kewarganegaraan = document.getElementById('quick-penulis-negara').value.trim();
+            payload.kewarganegaraan = (currentSelectedPenulisCountry && currentSelectedPenulisCountry.name) ? currentSelectedPenulisCountry.name : (document.getElementById('quick-penulis-negara').value.trim() || 'Indonesia');
             payload.bio = document.getElementById('quick-penulis-bio').value.trim();
         } else if (currentQuickType === 'penerbit') {
             var nama = document.getElementById('quick-penerbit-nama').value.trim();
@@ -1705,12 +1952,19 @@
             }
             payload.nama_penerbit = nama;
 
-            var rawDigits = document.getElementById('quick-penerbit-telepon').value.replace(/\D/g, '');
+            var telInput = document.getElementById('quick-penerbit-telepon');
+            var rawDigits = telInput.value.replace(/\D/g, '');
+            if (rawDigits.length > 0 && rawDigits.length !== 12) {
+                showQuickError('Nomor telepon harus tepat 12 digit angka (saat ini ' + rawDigits.length + ' digit). Tidak boleh kurang dan tidak boleh lebih.');
+                telInput.focus();
+                telInput.classList.remove('border-[#d1d5db]', 'border-amber-400', 'border-emerald-500');
+                telInput.classList.add('border-rose-500');
+                return;
+            }
             if (rawDigits.length > 12) {
                 rawDigits = rawDigits.substring(0, 12);
             }
-            var dial = (currentSelectedCountry && currentSelectedCountry.dial) ? currentSelectedCountry.dial : '+62';
-            payload.telepon = rawDigits ? (dial + ' ' + rawDigits) : '';
+            payload.telepon = rawDigits || '';
             payload.alamat = document.getElementById('quick-penerbit-alamat').value.trim();
         } else if (currentQuickType === 'rak') {
             var lokasi = document.getElementById('quick-rak-lokasi').value.trim();
@@ -1839,11 +2093,16 @@
         if (countryCont && !countryCont.contains(event.target)) {
             closeCountryDropdown();
         }
+        var penulisCountryCont = document.getElementById('penulis-country-dropdown-container');
+        if (penulisCountryCont && !penulisCountryCont.contains(event.target)) {
+            closePenulisCountryDropdown();
+        }
     });
 
     // Close modal on escape key
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
+            closePenulisCountryDropdown();
             closeCountryDropdown();
             closeQuickModal();
             closeCreateModal();

@@ -24,6 +24,19 @@ class PengaturanController extends Controller
         $backupSchedule = BackupService::getBackupSchedule();
         $backupFiles = BackupService::getBackupFiles();
 
+        $frameworkVersion = 'Laravel ' . app()->version();
+        try {
+            $rawDbVer = \Illuminate\Support\Facades\DB::select('SELECT VERSION() as v')[0]->v ?? '8.4.3';
+            if (preg_match('/^([0-9]+\.[0-9]+\.[0-9]+)/', $rawDbVer, $m)) {
+                $cleanDbVer = $m[1];
+            } else {
+                $cleanDbVer = $rawDbVer;
+            }
+            $databaseVersion = 'MySQL ' . $cleanDbVer . ' (LTS)';
+        } catch (\Throwable $e) {
+            $databaseVersion = 'MySQL 8.4.3 (LTS)';
+        }
+
         return view('pengaturan.index', compact(
             'user',
             'preferensi',
@@ -31,7 +44,9 @@ class PengaturanController extends Controller
             'dbSize',
             'lastBackup',
             'backupSchedule',
-            'backupFiles'
+            'backupFiles',
+            'frameworkVersion',
+            'databaseVersion'
         ));
     }
 

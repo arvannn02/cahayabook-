@@ -131,63 +131,30 @@ class PenulisController extends Controller
 
     public static function getCountryList(): array
     {
+        $jsonPath = public_path('js/countries195.json');
+        if (file_exists($jsonPath)) {
+            $data = json_decode(file_get_contents($jsonPath), true);
+            if (is_array($data) && count($data) >= 195) {
+                return array_map(function ($c) {
+                    $lower = strtolower($c['code']);
+                    $c['flag_url'] = "https://flagcdn.com/w40/{$lower}.png";
+                    return $c;
+                }, $data);
+            }
+        }
+
         $countries = [
-            ['code' => 'id', 'name' => 'Indonesia'],
-            ['code' => 'us', 'name' => 'Amerika Serikat'],
-            ['code' => 'gb', 'name' => 'Inggris'],
-            ['code' => 'my', 'name' => 'Malaysia'],
-            ['code' => 'sg', 'name' => 'Singapura'],
-            ['code' => 'jp', 'name' => 'Jepang'],
-            ['code' => 'kr', 'name' => 'Korea Selatan'],
-            ['code' => 'cn', 'name' => 'Tiongkok (China)'],
-            ['code' => 'tw', 'name' => 'Taiwan'],
-            ['code' => 'hk', 'name' => 'Hong Kong'],
-            ['code' => 'au', 'name' => 'Australia'],
-            ['code' => 'de', 'name' => 'Jerman'],
-            ['code' => 'fr', 'name' => 'Prancis'],
-            ['code' => 'nl', 'name' => 'Belanda'],
-            ['code' => 'it', 'name' => 'Italia'],
-            ['code' => 'es', 'name' => 'Spanyol'],
-            ['code' => 'ru', 'name' => 'Rusia'],
-            ['code' => 'ca', 'name' => 'Kanada'],
-            ['code' => 'in', 'name' => 'India'],
-            ['code' => 'sa', 'name' => 'Arab Saudi'],
-            ['code' => 'ae', 'name' => 'Uni Emirat Arab'],
-            ['code' => 'eg', 'name' => 'Mesir'],
-            ['code' => 'tr', 'name' => 'Turki'],
-            ['code' => 'th', 'name' => 'Thailand'],
-            ['code' => 'ph', 'name' => 'Filipina'],
-            ['code' => 'vn', 'name' => 'Vietnam'],
-            ['code' => 'bn', 'name' => 'Brunei Darussalam'],
-            ['code' => 'nz', 'name' => 'Selandia Baru'],
-            ['code' => 'ch', 'name' => 'Swiss'],
-            ['code' => 'se', 'name' => 'Swedia'],
-            ['code' => 'no', 'name' => 'Norwegia'],
-            ['code' => 'dk', 'name' => 'Denmark'],
-            ['code' => 'fi', 'name' => 'Finlandia'],
-            ['code' => 'ie', 'name' => 'Irlandia'],
-            ['code' => 'pt', 'name' => 'Portugal'],
-            ['code' => 'at', 'name' => 'Austria'],
-            ['code' => 'be', 'name' => 'Belgia'],
-            ['code' => 'pl', 'name' => 'Polandia'],
-            ['code' => 'br', 'name' => 'Brasil'],
-            ['code' => 'mx', 'name' => 'Meksiko'],
-            ['code' => 'ar', 'name' => 'Argentina'],
-            ['code' => 'cl', 'name' => 'Chili'],
-            ['code' => 'co', 'name' => 'Kolombia'],
-            ['code' => 'za', 'name' => 'Afrika Selatan'],
-            ['code' => 'pk', 'name' => 'Pakistan'],
-            ['code' => 'bd', 'name' => 'Bangladesh'],
-            ['code' => 'ma', 'name' => 'Maroko'],
-            ['code' => 'jo', 'name' => 'Yordania'],
-            ['code' => 'qa', 'name' => 'Qatar'],
-            ['code' => 'kw', 'name' => 'Kuwait'],
-            ['code' => 'ps', 'name' => 'Palestina'],
-            ['code' => 'ir', 'name' => 'Iran'],
+            ['code' => 'ID', 'name' => 'Indonesia', 'dial' => '+62'],
+            ['code' => 'US', 'name' => 'Amerika Serikat', 'dial' => '+1'],
+            ['code' => 'GB', 'name' => 'Inggris', 'dial' => '+44'],
+            ['code' => 'MY', 'name' => 'Malaysia', 'dial' => '+60'],
+            ['code' => 'SG', 'name' => 'Singapura', 'dial' => '+65'],
+            ['code' => 'JP', 'name' => 'Jepang', 'dial' => '+81'],
         ];
 
         return array_map(function ($c) {
-            $c['flag_url'] = "https://flagcdn.com/w40/{$c['code']}.png";
+            $lower = strtolower($c['code']);
+            $c['flag_url'] = "https://flagcdn.com/w40/{$lower}.png";
             return $c;
         }, $countries);
     }

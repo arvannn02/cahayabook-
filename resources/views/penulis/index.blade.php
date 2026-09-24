@@ -464,6 +464,7 @@
                             <div class="flex items-center gap-2.5 overflow-hidden">
                                 <img id="create-selected-flag" src="https://flagcdn.com/w40/id.png" alt="Indonesia" class="w-5 h-3.5 object-cover rounded-[2px] shadow-2xs border border-gray-200 shrink-0">
                                 <span id="create-selected-name" class="font-medium text-[#111827] truncate">Indonesia</span>
+                                <span id="create-selected-dial" class="text-[11.5px] font-mono text-gray-500 font-semibold bg-gray-100 px-1.5 py-0.5 rounded">(+62)</span>
                             </div>
                             <svg class="w-4 h-4 text-[#6b7280] shrink-0 transition-transform duration-200" id="create-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -476,24 +477,76 @@
                                     <input type="text" 
                                            id="create-country-search" 
                                            oninput="filterCountryList('create')" 
-                                           placeholder="Cari negara..." 
+                                           placeholder="Cari dari 195 negara atau kode telepon (+62)..." 
                                            class="w-full pl-8 pr-3 py-1.5 text-[12.5px] bg-white border border-[#e5e7eb] rounded-lg focus:outline-none focus:border-[#2d4636]">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-[#9ca3af]">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                     </div>
                                 </div>
                             </div>
-                            <div id="create-country-list" class="max-h-52 overflow-y-auto p-1 divide-y divide-gray-50">
+<style>
+    /* Custom Scrollbar exactly like Photo 2 with Up & Down Arrows */
+    .country-scroll-list {
+        scrollbar-width: thin;
+        scrollbar-color: #2d4636 #edf2f7;
+        overscroll-behavior: contain;
+    }
+
+    .country-scroll-list::-webkit-scrollbar {
+        width: 14px;
+        display: block;
+    }
+
+    .country-scroll-list::-webkit-scrollbar-track {
+        background: #edf2f7;
+        border-radius: 4px;
+    }
+
+    .country-scroll-list::-webkit-scrollbar-thumb {
+        background-color: #2d4636;
+        border-radius: 6px;
+        border: 2px solid #edf2f7;
+    }
+
+    .country-scroll-list::-webkit-scrollbar-thumb:hover {
+        background-color: #1b2e23;
+    }
+
+    /* Up Arrow button */
+    .country-scroll-list::-webkit-scrollbar-button:single-button:vertical:decrement {
+        background-color: #edf2f7;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='%232d4636'><path d='M12 6l-6 8h12z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 16px;
+        display: block;
+    }
+
+    /* Down Arrow button */
+    .country-scroll-list::-webkit-scrollbar-button:single-button:vertical:increment {
+        background-color: #edf2f7;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='%232d4636'><path d='M12 18l6-8H6z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: center;
+        height: 16px;
+        display: block;
+    }
+</style>
+
+                            <div id="create-country-list" style="height: 220px; max-height: 220px; overflow-y: scroll; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" class="country-scroll-list p-1 divide-y divide-gray-50">
                                 @foreach($negaraList as $c)
                                     <button type="button"
-                                            onclick="selectCountry('create', '{{ $c['name'] }}', '{{ $c['flag_url'] }}')"
-                                            class="country-option w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-[12.5px] hover:bg-[#f3f4f6] transition-colors cursor-pointer group {{ $c['code'] === 'id' ? 'bg-[#edf3ee] font-semibold' : '' }}"
-                                            data-name="{{ strtolower($c['name']) }}">
+                                            onclick="selectCountry('create', '{{ $c['name'] }}', '{{ $c['flag_url'] }}', '{{ $c['dial'] ?? '' }}')"
+                                            class="country-option w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-[12.5px] hover:bg-[#f3f4f6] transition-colors cursor-pointer group {{ (isset($c['code']) && strtolower($c['code']) === 'id') ? 'bg-[#edf3ee] font-semibold' : '' }}"
+                                            data-name="{{ strtolower($c['name']) }} {{ strtolower($c['dial'] ?? '') }}">
                                         <div class="flex items-center gap-2.5">
                                             <img src="{{ $c['flag_url'] }}" alt="{{ $c['name'] }}" class="w-5 h-3.5 object-cover rounded-[2px] shadow-2xs border border-gray-200 shrink-0" loading="lazy">
                                             <span class="text-[#374151] group-hover:text-[#111827]">{{ $c['name'] }}</span>
+                                            @if(!empty($c['dial']))
+                                                <span class="text-[11px] font-mono text-gray-400 font-semibold flex-shrink-0">({{ $c['dial'] }})</span>
+                                            @endif
                                         </div>
-                                        <span class="check-icon text-[#2d4636] {{ $c['code'] === 'id' ? '' : 'hidden' }}">
+                                        <span class="check-icon text-[#2d4636] {{ (isset($c['code']) && strtolower($c['code']) === 'id') ? '' : 'hidden' }}">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                         </span>
                                     </button>
@@ -566,6 +619,7 @@
                             <div class="flex items-center gap-2.5 overflow-hidden">
                                 <img id="edit-selected-flag" src="" alt="" class="w-5 h-3.5 object-cover rounded-[2px] shadow-2xs border border-gray-200 shrink-0 hidden">
                                 <span id="edit-selected-name" class="font-medium text-[#111827] truncate">-- Pilih Kewarganegaraan --</span>
+                                <span id="edit-selected-dial" class="text-[11.5px] font-mono text-gray-500 font-semibold bg-gray-100 px-1.5 py-0.5 rounded hidden"></span>
                             </div>
                             <svg class="w-4 h-4 text-[#6b7280] shrink-0 transition-transform duration-200" id="edit-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -578,22 +632,25 @@
                                     <input type="text" 
                                            id="edit-country-search" 
                                            oninput="filterCountryList('edit')" 
-                                           placeholder="Cari negara..." 
+                                           placeholder="Cari dari 195 negara atau kode telepon (+62)..." 
                                            class="w-full pl-8 pr-3 py-1.5 text-[12.5px] bg-white border border-[#e5e7eb] rounded-lg focus:outline-none focus:border-[#2d4636]">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none text-[#9ca3af]">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                     </div>
                                 </div>
                             </div>
-                            <div id="edit-country-list" class="max-h-52 overflow-y-auto p-1 divide-y divide-gray-50">
+                            <div id="edit-country-list" style="height: 220px; max-height: 220px; overflow-y: scroll; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;" class="country-scroll-list p-1 divide-y divide-gray-50">
                                 @foreach($negaraList as $c)
                                     <button type="button"
-                                            onclick="selectCountry('edit', '{{ $c['name'] }}', '{{ $c['flag_url'] }}')"
+                                            onclick="selectCountry('edit', '{{ $c['name'] }}', '{{ $c['flag_url'] }}', '{{ $c['dial'] ?? '' }}')"
                                             class="country-option w-full flex items-center justify-between px-3 py-2 rounded-lg text-left text-[12.5px] hover:bg-[#f3f4f6] transition-colors cursor-pointer group"
-                                            data-name="{{ strtolower($c['name']) }}">
+                                            data-name="{{ strtolower($c['name']) }} {{ strtolower($c['dial'] ?? '') }}">
                                         <div class="flex items-center gap-2.5">
                                             <img src="{{ $c['flag_url'] }}" alt="{{ $c['name'] }}" class="w-5 h-3.5 object-cover rounded-[2px] shadow-2xs border border-gray-200 shrink-0" loading="lazy">
                                             <span class="text-[#374151] group-hover:text-[#111827]">{{ $c['name'] }}</span>
+                                            @if(!empty($c['dial']))
+                                                <span class="text-[11px] font-mono text-gray-400 font-semibold flex-shrink-0">({{ $c['dial'] }})</span>
+                                            @endif
                                         </div>
                                         <span class="check-icon text-[#2d4636] hidden">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -692,7 +749,7 @@
     const negaraList = @json($negaraList);
 
     function openCreateModal() {
-        selectCountry('create', 'Indonesia', 'https://flagcdn.com/w40/id.png');
+        selectCountry('create', 'Indonesia', 'https://flagcdn.com/w40/id.png', '+62');
         document.getElementById('create-modal').classList.remove('hidden');
     }
     function closeCreateModal() {
@@ -707,16 +764,21 @@
         
         var kw = (author.kewarganegaraan || '').trim();
         var flagUrl = author.flag_url;
-        if (!flagUrl && kw) {
+        var dialCode = '';
+        if (kw) {
             var found = negaraList.find(c => c.name.toLowerCase() === kw.toLowerCase() || kw.toLowerCase().includes(c.name.toLowerCase()));
-            if (found) flagUrl = found.flag_url;
+            if (found) {
+                if (!flagUrl) flagUrl = found.flag_url;
+                if (found.dial) dialCode = found.dial;
+            }
         }
 
         var flagImgHtml = flagUrl ? `<img src="${flagUrl}" alt="${kw}" class="w-4 h-3 object-cover rounded-[2px] shadow-2xs border border-gray-200 inline-block shrink-0 mr-1.5">` : '';
+        var dialBadgeHtml = dialCode ? `<span class="ml-1 text-[11px] font-mono text-gray-500 font-semibold bg-gray-100 px-1.5 py-0.5 rounded">(${dialCode})</span>` : '';
 
         if (kw) {
-            document.getElementById('detail-kewarganegaraan-badge').innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11.5px] font-medium bg-[#edf3ee] text-[#2d4636] border border-[#d2e2d5]">${flagImgHtml}<span>${kw}</span></span>`;
-            document.getElementById('detail-kewarganegaraan').innerHTML = `<span class="inline-flex items-center">${flagImgHtml}<span>${kw}</span></span>`;
+            document.getElementById('detail-kewarganegaraan-badge').innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11.5px] font-medium bg-[#edf3ee] text-[#2d4636] border border-[#d2e2d5]">${flagImgHtml}<span>${kw}</span>${dialBadgeHtml}</span>`;
+            document.getElementById('detail-kewarganegaraan').innerHTML = `<span class="inline-flex items-center">${flagImgHtml}<span>${kw}</span>${dialBadgeHtml}</span>`;
         } else {
             document.getElementById('detail-kewarganegaraan-badge').innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11.5px] font-medium bg-[#e5e7eb] text-[#4b5563]">Warga Negara</span>`;
             document.getElementById('detail-kewarganegaraan').innerHTML = '-';
@@ -736,14 +798,16 @@
         
         var kw = (author.kewarganegaraan || '').trim();
         var flagUrl = author.flag_url;
-        if (!flagUrl && kw) {
+        var dialCode = '';
+        if (kw) {
             var found = negaraList.find(c => c.name.toLowerCase() === kw.toLowerCase() || kw.toLowerCase().includes(c.name.toLowerCase()));
             if (found) {
                 kw = found.name;
                 flagUrl = found.flag_url;
+                dialCode = found.dial || '';
             }
         }
-        selectCountry('edit', kw, flagUrl);
+        selectCountry('edit', kw, flagUrl, dialCode);
 
         document.getElementById('edit-bio').value = author.bio || '';
         document.getElementById('edit-modal').classList.remove('hidden');
@@ -783,15 +847,31 @@
         });
     }
 
-    function selectCountry(type, name, flagUrl) {
+    function selectCountry(type, name, flagUrl, dial) {
         const hiddenInput = document.getElementById(type + '-kewarganegaraan');
         const nameEl = document.getElementById(type + '-selected-name');
         const flagEl = document.getElementById(type + '-selected-flag');
+        const dialEl = document.getElementById(type + '-selected-dial');
         const dropdown = document.getElementById(type + '-country-dropdown');
         const chevron = document.getElementById(type + '-chevron');
 
         if (hiddenInput) hiddenInput.value = name || '';
         if (nameEl) nameEl.textContent = name || '-- Pilih Kewarganegaraan --';
+
+        if (!dial && name) {
+            const found = negaraList.find(c => c.name.toLowerCase() === name.toLowerCase() || name.toLowerCase().includes(c.name.toLowerCase()));
+            if (found && found.dial) dial = found.dial;
+        }
+
+        if (dialEl) {
+            if (dial) {
+                dialEl.textContent = '(' + dial + ')';
+                dialEl.classList.remove('hidden');
+            } else {
+                dialEl.textContent = '';
+                dialEl.classList.add('hidden');
+            }
+        }
 
         if (flagEl) {
             if (!flagUrl && name) {

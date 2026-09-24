@@ -87,11 +87,26 @@ class PenerbitController extends Controller
         $data = $request->validate([
             'nama_penerbit' => ['required', 'string', 'max:150'],
             'alamat' => ['nullable', 'string'],
-            'telepon' => ['nullable', 'string', 'max:20']
+            'telepon' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if ($value !== null && trim($value) !== '') {
+                        $digits = preg_replace('/\D/', '', $value);
+                        if (strlen($digits) !== 12) {
+                            $fail('Nomor telepon harus tepat 12 digit angka (tidak boleh kurang dan tidak boleh lebih).');
+                        }
+                    }
+                }
+            ],
         ], [
             'nama_penerbit.required' => 'Nama penerbit wajib diisi.',
-            'telepon.max' => 'Nomor telepon maksimal 20 karakter.',
         ]);
+
+        if (isset($data['telepon']) && $data['telepon'] !== null && trim($data['telepon']) !== '') {
+            $data['telepon'] = preg_replace('/\D/', '', $data['telepon']);
+        }
+
         $penerbit = Penerbit::create($data);
 
         if ($request->ajax() || $request->wantsJson()) {
@@ -113,11 +128,26 @@ class PenerbitController extends Controller
         $data = $request->validate([
             'nama_penerbit' => ['required', 'string', 'max:150'],
             'alamat' => ['nullable', 'string'],
-            'telepon' => ['nullable', 'string', 'max:20']
+            'telepon' => [
+                'nullable',
+                'string',
+                function ($attribute, $value, $fail) {
+                    if ($value !== null && trim($value) !== '') {
+                        $digits = preg_replace('/\D/', '', $value);
+                        if (strlen($digits) !== 12) {
+                            $fail('Nomor telepon harus tepat 12 digit angka (tidak boleh kurang dan tidak boleh lebih).');
+                        }
+                    }
+                }
+            ],
         ], [
             'nama_penerbit.required' => 'Nama penerbit wajib diisi.',
-            'telepon.max' => 'Nomor telepon maksimal 20 karakter.',
         ]);
+
+        if (isset($data['telepon']) && $data['telepon'] !== null && trim($data['telepon']) !== '') {
+            $data['telepon'] = preg_replace('/\D/', '', $data['telepon']);
+        }
+
         $penerbit->update($data);
         return back()->with('success', 'Penerbit berhasil diperbarui.');
     }

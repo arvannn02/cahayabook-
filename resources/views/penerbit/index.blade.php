@@ -491,7 +491,7 @@
             </div>
 
             {{-- Modal Form --}}
-            <form action="{{ route('penerbit.store') }}" method="POST" class="p-6 space-y-4">
+            <form id="create-form" action="{{ route('penerbit.store') }}" method="POST" class="p-6 space-y-4">
                 @csrf
 
                 <div>
@@ -500,9 +500,22 @@
                 </div>
 
                 <div>
-                    <label class="block text-[12px] font-semibold text-[#374151] mb-1">Telepon</label>
-                    <input type="text" name="telepon" maxlength="20" placeholder="Contoh: +62 81234567890" class="w-full px-3.5 py-2 text-[13px] border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636]">
-                    <p class="text-[11px] text-gray-400 mt-1">Maksimal 20 karakter termasuk kode negara.</p>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-[12px] font-semibold text-[#374151]">Telepon</label>
+                        <span id="create-telepon-counter" class="text-[11px] font-mono font-medium text-[#9ca3af]">0 / 12 digit</span>
+                    </div>
+                    <input type="text" 
+                           id="create-telepon"
+                           name="telepon" 
+                           inputmode="numeric" 
+                           maxlength="12" 
+                           placeholder="Contoh: 081234567890" 
+                           autocomplete="off" 
+                           class="w-full px-3.5 py-2 text-[13px] font-mono border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636] transition-all">
+                    <div id="create-telepon-feedback" class="text-[11.5px] mt-1.5 flex items-center gap-1.5 text-[#6b7280]">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0 text-[#9ca3af]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Maksimal 12 digit angka (tidak boleh kurang dan tidak boleh lebih).</span>
+                    </div>
                 </div>
 
                 <div>
@@ -557,9 +570,22 @@
                 </div>
 
                 <div>
-                    <label class="block text-[12px] font-semibold text-[#374151] mb-1">Telepon</label>
-                    <input type="text" id="edit-telepon" name="telepon" maxlength="20" class="w-full px-3.5 py-2 text-[13px] border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636]">
-                    <p class="text-[11px] text-gray-400 mt-1">Maksimal 20 karakter termasuk kode negara.</p>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-[12px] font-semibold text-[#374151]">Telepon</label>
+                        <span id="edit-telepon-counter" class="text-[11px] font-mono font-medium text-[#9ca3af]">0 / 12 digit</span>
+                    </div>
+                    <input type="text" 
+                           id="edit-telepon" 
+                           name="telepon" 
+                           inputmode="numeric" 
+                           maxlength="12" 
+                           placeholder="Contoh: 081234567890" 
+                           autocomplete="off" 
+                           class="w-full px-3.5 py-2 text-[13px] font-mono border border-[#d1d5db] rounded-lg focus:outline-none focus:border-[#2d4636] focus:ring-1 focus:ring-[#2d4636] transition-all">
+                    <div id="edit-telepon-feedback" class="text-[11.5px] mt-1.5 flex items-center gap-1.5 text-[#6b7280]">
+                        <svg class="w-3.5 h-3.5 flex-shrink-0 text-[#9ca3af]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Maksimal 12 digit angka (tidak boleh kurang dan tidak boleh lebih).</span>
+                    </div>
                 </div>
 
                 <div>
@@ -639,7 +665,92 @@
 </div>
 
 <script>
+    // Phone input restriction: exactly 12 digits, numeric only, live counter & feedback
+    function initPenerbitPhoneField(inputId, counterId, feedbackId, formId) {
+        var input = document.getElementById(inputId);
+        var counter = document.getElementById(counterId);
+        var feedback = document.getElementById(feedbackId);
+        var form = document.getElementById(formId);
+        if (!input) return function() {};
+
+        function update() {
+            var raw = input.value;
+            var clean = raw.replace(/\D/g, '');
+            if (clean.length > 12) {
+                clean = clean.substring(0, 12);
+            }
+            if (input.value !== clean) {
+                input.value = clean;
+            }
+
+            var len = clean.length;
+            if (counter) {
+                counter.textContent = len + ' / 12 digit';
+                if (len === 0) {
+                    counter.className = 'text-[11px] font-mono font-medium text-[#9ca3af]';
+                } else if (len < 12) {
+                    counter.className = 'text-[11px] font-mono font-bold text-amber-600';
+                } else {
+                    counter.className = 'text-[11px] font-mono font-bold text-emerald-600';
+                }
+            }
+
+            if (feedback) {
+                if (len === 0) {
+                    feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-[#9ca3af]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Maksimal 12 digit angka (tidak boleh kurang dan tidak boleh lebih).</span>';
+                    feedback.className = 'text-[11.5px] mt-1.5 flex items-center gap-1.5 text-[#6b7280]';
+                    input.classList.remove('border-amber-400', 'border-rose-500', 'border-emerald-500', 'focus:border-amber-500', 'focus:ring-amber-500', 'focus:border-rose-500', 'focus:ring-rose-500', 'focus:border-emerald-500', 'focus:ring-emerald-500');
+                    input.classList.add('border-[#d1d5db]');
+                } else if (len < 12) {
+                    feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg><span class="font-medium text-amber-700">Kurang ' + (12 - len) + ' digit lagi (' + len + '/12 digit). Nomor telepon harus tepat 12 digit.</span>';
+                    feedback.className = 'text-[11.5px] mt-1.5 flex items-center gap-1.5 text-amber-700';
+                    input.classList.remove('border-[#d1d5db]', 'border-emerald-500', 'border-rose-500');
+                    input.classList.add('border-amber-400');
+                } else {
+                    feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg><span class="font-medium text-emerald-700">✓ Nomor telepon valid (tepat 12 digit).</span>';
+                    feedback.className = 'text-[11.5px] mt-1.5 flex items-center gap-1.5 text-emerald-700';
+                    input.classList.remove('border-[#d1d5db]', 'border-amber-400', 'border-rose-500');
+                    input.classList.add('border-emerald-500');
+                }
+            }
+        }
+
+        input.addEventListener('input', update);
+        input.addEventListener('paste', function() {
+            setTimeout(update, 10);
+        });
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                var clean = input.value.replace(/\D/g, '');
+                if (clean.length > 0 && clean.length !== 12) {
+                    e.preventDefault();
+                    input.focus();
+                    input.classList.remove('border-[#d1d5db]', 'border-amber-400', 'border-emerald-500');
+                    input.classList.add('border-rose-500');
+                    if (feedback) {
+                        feedback.innerHTML = '<svg class="w-3.5 h-3.5 flex-shrink-0 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="font-semibold text-rose-600">Nomor telepon harus tepat 12 digit (saat ini ' + clean.length + ' digit). Tidak boleh kurang dan tidak boleh lebih.</span>';
+                        feedback.className = 'text-[11.5px] mt-1.5 flex items-center gap-1.5 text-rose-600';
+                    }
+                    return false;
+                }
+            });
+        }
+
+        return update;
+    }
+
+    var updateCreatePhone = initPenerbitPhoneField('create-telepon', 'create-telepon-counter', 'create-telepon-feedback', 'create-form');
+    var updateEditPhone = initPenerbitPhoneField('edit-telepon', 'edit-telepon-counter', 'edit-telepon-feedback', 'edit-form');
+
     function openCreateModal() {
+        var input = document.getElementById('create-telepon');
+        if (input) {
+            input.value = '';
+            if (typeof updateCreatePhone === 'function') {
+                updateCreatePhone();
+            }
+        }
         document.getElementById('create-modal').classList.remove('hidden');
     }
     function closeCreateModal() {
@@ -661,7 +772,14 @@
     function openEditModal(penerbit) {
         document.getElementById('edit-form').action = '/penerbit/' + penerbit.id;
         document.getElementById('edit-nama').value = penerbit.nama_penerbit || '';
-        document.getElementById('edit-telepon').value = penerbit.telepon || '';
+        
+        var rawTel = (penerbit.telepon || '').replace(/\D/g, '');
+        if (rawTel.length > 12) rawTel = rawTel.substring(0, 12);
+        document.getElementById('edit-telepon').value = rawTel;
+        if (typeof updateEditPhone === 'function') {
+            updateEditPhone();
+        }
+
         document.getElementById('edit-alamat').value = penerbit.alamat || '';
         document.getElementById('edit-modal').classList.remove('hidden');
     }

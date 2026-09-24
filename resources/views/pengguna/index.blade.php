@@ -214,13 +214,19 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
                     </button>
 
-                    {{-- Page Buttons (1, 2, 3...) sesuai desain foto ke-2 --}}
-                    @for($p = 1; $p <= $totalLogPages; $p++)
-                        <button type="button" onclick="goToLogPage({{ $p }})" id="logPageBtn-{{ $p }}"
-                                class="w-8 h-8 rounded-lg font-bold text-[13px] flex items-center justify-center transition-colors cursor-pointer {{ $p === 1 ? 'bg-[#2d4636] text-white shadow-sm border border-[#2d4636]' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50' }}">
-                            {{ $p }}
+                    {{-- Page Buttons: Compact Sliding Window (< 1 2 > dan seterusnya) --}}
+                    <div id="logPageButtonsContainer" class="flex items-center gap-1.5">
+                        <button type="button" onclick="goToLogPage(1)" id="logPageBtn-1"
+                                class="w-8 h-8 rounded-lg font-bold text-[13px] flex items-center justify-center transition-colors cursor-pointer bg-[#2d4636] text-white shadow-sm border border-[#2d4636]">
+                            1
                         </button>
-                    @endfor
+                        @if($totalLogPages >= 2)
+                            <button type="button" onclick="goToLogPage(2)" id="logPageBtn-2"
+                                    class="w-8 h-8 rounded-lg font-semibold text-[13px] flex items-center justify-center transition-colors cursor-pointer bg-white text-gray-700 border border-gray-200 hover:bg-gray-50">
+                                2
+                            </button>
+                        @endif
+                    </div>
 
                     {{-- Next Button (>) --}}
                     <button type="button" onclick="goToLogPage(currentLogPage + 1)" id="btnLogNext"
@@ -470,10 +476,36 @@
         }
     });
 
-    // Slide Pagination for Log Aktivitas (Max 5 rows per page)
+    // Slide Pagination for Log Aktivitas (Max 5 rows per page, compact < 1 2 > window)
     let currentLogPage = 1;
     const totalLogPages = {{ $totalLogPages ?? 1 }};
     const totalLogRows = {{ count($aktivitas) }};
+
+    function renderLogPaginationButtons(page) {
+        const container = document.getElementById('logPageButtonsContainer');
+        if (!container) return;
+
+        // Window size 1: shows [1, 2] on page 1, [p-1, p, p+1] in middle, [last-1, last] on last page
+        const windowSize = 1;
+        const start = Math.max(1, page - windowSize);
+        const end = Math.min(totalLogPages, page + windowSize);
+
+        let html = '';
+        for (let p = start; p <= end; p++) {
+            if (p === page) {
+                html += `<button type="button" onclick="goToLogPage(${p})" id="logPageBtn-${p}"
+                                 class="w-8 h-8 rounded-lg font-bold text-[13px] flex items-center justify-center transition-colors bg-[#2d4636] text-white shadow-sm border border-[#2d4636] cursor-pointer">
+                            ${p}
+                         </button>`;
+            } else {
+                html += `<button type="button" onclick="goToLogPage(${p})" id="logPageBtn-${p}"
+                                 class="w-8 h-8 rounded-lg font-semibold text-[13px] flex items-center justify-center transition-colors bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                            ${p}
+                         </button>`;
+            }
+        }
+        container.innerHTML = html;
+    }
 
     function goToLogPage(page) {
         if (page < 1 || page > totalLogPages) return;
@@ -488,23 +520,32 @@
             }
         });
 
-        // Update page buttons
-        for (let p = 1; p <= totalLogPages; p++) {
-            const btn = document.getElementById('logPageBtn-' + p);
-            if (btn) {
-                if (p === page) {
-                    btn.className = 'w-8 h-8 rounded-lg font-bold text-[13px] flex items-center justify-center transition-colors bg-[#2d4636] text-white shadow-sm border border-[#2d4636] cursor-pointer';
-                } else {
-                    btn.className = 'w-8 h-8 rounded-lg font-semibold text-[13px] flex items-center justify-center transition-colors bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 cursor-pointer';
-                }
-            }
-        }
+        // Re-render compact page buttons
+        renderLogPaginationButtons(page);
 
         // Update Prev / Next buttons
         const btnPrev = document.getElementById('btnLogPrev');
         const btnNext = document.getElementById('btnLogNext');
-        if (btnPrev) btnPrev.disabled = (page === 1);
-        if (btnNext) btnNext.disabled = (page === totalLogPages);
+        if (btnPrev) {
+            btnPrev.disabled = (page === 1);
+            if (page === 1) {
+                btnPrev.classList.add('opacity-30', 'cursor-not-allowed');
+                btnPrev.classList.remove('cursor-pointer');
+            } else {
+                btnPrev.classList.remove('opacity-30', 'cursor-not-allowed');
+                btnPrev.classList.add('cursor-pointer');
+            }
+        }
+        if (btnNext) {
+            btnNext.disabled = (page === totalLogPages);
+            if (page === totalLogPages) {
+                btnNext.classList.add('opacity-30', 'cursor-not-allowed');
+                btnNext.classList.remove('cursor-pointer');
+            } else {
+                btnNext.classList.remove('opacity-30', 'cursor-not-allowed');
+                btnNext.classList.add('cursor-pointer');
+            }
+        }
 
         // Update info text
         const info = document.getElementById('logPaginationInfo');

@@ -71,11 +71,11 @@
                 </div>
                 <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <span class="text-[13px] text-gray-500">{{ __('Framework') }}</span>
-                    <span class="text-[13px] font-semibold text-gray-900">Laravel 12.x</span>
+                    <span class="text-[13px] font-semibold text-gray-900">{{ $frameworkVersion ?? ('Laravel ' . app()->version()) }}</span>
                 </div>
                 <div class="flex items-center justify-between py-2 border-b border-gray-50">
                     <span class="text-[13px] text-gray-500">{{ __('Database') }}</span>
-                    <span class="text-[13px] font-semibold text-gray-900">MySQL 8.0</span>
+                    <span class="text-[13px] font-semibold text-gray-900">{{ $databaseVersion ?? 'MySQL 8.4.3 (LTS)' }}</span>
                 </div>
                 <div class="flex items-center justify-between py-2">
                     <span class="text-[13px] text-gray-500">{{ __('Status Server') }}</span>
